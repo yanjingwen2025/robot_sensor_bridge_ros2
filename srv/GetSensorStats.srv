@@ -1,0 +1,4 @@
+---
+uint32 total_messages
+float64 last_timestamp
+string status
