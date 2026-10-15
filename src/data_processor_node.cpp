@@ -7,16 +7,25 @@
 class DataProcessorNode : public rclcpp::Node {
 public:
     DataProcessorNode() : Node("data_processor_node") {
-        // 订阅统计摘要话题
-        subscription_ = this->create_subscription<std_msgs::msg::String>(
-            "/sensor_summary", 10,
-            std::bind(&DataProcessorNode::summary_callback, this, std::placeholders::_1));
+    // 声明参数
+    this->declare_parameter<std::string>("input_topic", "/sensor_summary");
+    this->declare_parameter<std::string>("output_topic", "/processed_result");
 
-        // 发布处理后的结果
-        publisher_ = this->create_publisher<std_msgs::msg::String>("/processed_result", 10);
+    // 读取参数
+    std::string input_topic = this->get_parameter("input_topic").as_string();
+    std::string output_topic = this->get_parameter("output_topic").as_string();
 
-        RCLCPP_INFO(this->get_logger(), "Data Processor Node started.");
-    }
+    // 用参数创建
+    subscription_ = this->create_subscription<std_msgs::msg::String>(
+        input_topic, 10,
+        std::bind(&DataProcessorNode::summary_callback, this, std::placeholders::_1));
+
+    publisher_ = this->create_publisher<std_msgs::msg::String>(output_topic, 10);
+
+    RCLCPP_INFO(this->get_logger(),
+                "Data Processor Node started. input=%s, output=%s",
+                input_topic.c_str(), output_topic.c_str());
+}
 
 private:
     void summary_callback(const std_msgs::msg::String::SharedPtr msg) {

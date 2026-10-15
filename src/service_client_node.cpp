@@ -9,15 +9,26 @@ using namespace std::chrono_literals;
 class ServiceClientNode : public rclcpp::Node {
 public:
     ServiceClientNode() : Node("service_client_node") {
-        // 创建服务客户端
-        client_ = this->create_client<sensor_gateway::srv::GetSensorStats>("get_sensor_stats");
+    // 声明参数
+    this->declare_parameter<std::string>("service_name", "get_sensor_stats");
+    this->declare_parameter<double>("call_period", 5.0);
 
-        // 定时器：每5秒调用一次服务
-        timer_ = this->create_wall_timer(5s, std::bind(&ServiceClientNode::call_service, this));
+    // 读取参数
+    std::string service_name = this->get_parameter("service_name").as_string();
+    double call_period = this->get_parameter("call_period").as_double();
 
-        RCLCPP_INFO(this->get_logger(), "Service Client Node started.");
-    }
+    // 用参数创建客户端
+    client_ = this->create_client<sensor_gateway::srv::GetSensorStats>(service_name);
 
+    // 定时器用参数周期
+    timer_ = this->create_wall_timer(
+        std::chrono::duration<double>(call_period),
+        std::bind(&ServiceClientNode::call_service, this));
+
+    RCLCPP_INFO(this->get_logger(),
+                "Service Client Node started. service=%s, period=%.2fs",
+                service_name.c_str(), call_period);
+}
 private:
     void call_service() {
         // 检查服务是否可用

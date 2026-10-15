@@ -1,0 +1,3 @@
+uint32 total_messages
+float64 avg_latency
+float64 max_latency

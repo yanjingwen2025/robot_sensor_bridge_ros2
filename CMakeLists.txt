@@ -29,6 +29,7 @@ endif()
 
 rosidl_generate_interfaces(${PROJECT_NAME}
   "srv/GetSensorStats.srv"
+  "msg/GatewayStats.msg" 
 )
 
 # 添加可执行文件
@@ -49,6 +50,10 @@ add_executable(service_client_node src/service_client_node.cpp)
 ament_target_dependencies(service_client_node 
   rclcpp
 )
+
+add_executable(imu_test_publisher src/imu_test_publisher.cpp)
+ament_target_dependencies(imu_test_publisher rclcpp sensor_msgs)
+
 target_link_libraries(service_client_node 
   ${PROJECT_NAME}__rosidl_typesupport_cpp
 )
@@ -58,6 +63,7 @@ install(TARGETS
   sensor_gateway_node
   data_processor_node
   service_client_node
+  imu_test_publisher
   DESTINATION lib/${PROJECT_NAME}
 )
 
@@ -66,5 +72,7 @@ install(TARGETS
 install(DIRECTORY srv/
   DESTINATION share/${PROJECT_NAME}/srv
 )
+install(DIRECTORY launch
+        DESTINATION share/${PROJECT_NAME})
 
 ament_package()
